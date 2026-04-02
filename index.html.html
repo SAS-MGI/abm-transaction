@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABM Transaction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    /* Fallback polices si Google Fonts bloqué */
+    :root {
+      --font-titre: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
+      --font-corps: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    }
+  </style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --noir: #0e0e0e;
+      --blanc: #f8f6f2;
+      --or: #b8976a;
+      --or-clair: #d4b896;
+      --gris: #5a5a5a;
+      --gris-clair: #e8e4de;
+      --font-titre: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --font-corps: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--blanc);
+      color: var(--noir);
+      font-family: var(--font-corps);
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ─── NAVIGATION ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 60px;
+      background: rgba(248, 246, 242, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gris-clair);
+      transition: padding 0.3s;
+    }
+    nav.scrolled { padding: 16px 60px; }
+
+    .nav-logo {
+      font-family: var(--font-titre);
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--noir);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--or); }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-corps);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gris);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--or); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 80px;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 60px 80px 60px;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 28px;
+      font-weight: 400;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .hero-titre {
+      font-family: var(--font-titre);
+      font-size: clamp(52px, 6vw, 88px);
+      font-weight: 300;
+      line-height: 1.05;
+      color: var(--noir);
+      margin-bottom: 32px;
+    }
+    .hero-titre em {
+      font-style: italic;
+      color: var(--or);
+    }
+
+    .hero-sous-titre {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--gris);
+      max-width: 380px;
+      margin-bottom: 52px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--noir);
+      color: var(--blanc);
+      padding: 16px 36px;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s;
+      align-self: flex-start;
+    }
+    .hero-cta:hover { background: var(--or); }
+    .hero-cta svg { width: 16px; height: 16px; }
+
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+      background: var(--noir);
+    }
+
+    .hero-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(184,151,106,0.08) 0%, rgba(14,14,14,0.45) 100%);
+      z-index: 1;
+    }
+
+    .hero-image-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=2400&q=100&fit=crop');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.85;
+      transform: scale(1.05);
+      transition: transform 8s ease;
+    }
+    .hero-right:hover .hero-image-bg { transform: scale(1); }
+
+    .hero-stat-bloc {
+      position: absolute;
+      bottom: 60px;
+      left: 50px;
+      z-index: 2;
+      color: var(--blanc);
+    }
+    .hero-stat-bloc .stat-num {
+      font-family: var(--font-titre);
+      font-size: 64px;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--or-clair);
+    }
+    .hero-stat-bloc .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-top: 6px;
+    }
+
+    /* ─── LIGNE DÉCORATIVE ─── */
+    .separateur {
+      width: 60px;
+      height: 1px;
+      background: var(--or);
+      margin: 0 auto 24px;
+    }
+
+    /* ─── SECTION GÉNÉRIQUE ─── */
+    section { padding: 100px 60px; }
+
+    .section-titre {
+      font-family: var(--font-titre);
+      font-size: clamp(36px, 4vw, 56px);
+      font-weight: 300;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .section-titre em { font-style: italic; color: var(--or); }
+
+    .section-sous-titre {
+      font-size: 14px;
+      color: var(--gris);
+      text-align: center;
+      letter-spacing: 0.08em;
+      margin-bottom: 70px;
+    }
+
+    /* ─── HONORAIRES ─── */
+    #honoraires { background: var(--noir); color: var(--blanc); }
+    #honoraires .section-titre { color: var(--blanc); }
+    #honoraires .section-sous-titre { color: rgba(255,255,255,0.45); }
+
+    .hono-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hono-card {
+      background: #181818;
+      padding: 48px 40px;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .hono-card:hover { background: #1f1f1f; }
+    .hono-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--or);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s;
+    }
+    .hono-card:hover::before { transform: scaleX(1); }
+
+    .hono-card-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 20px;
+    }
+
+    .hono-card-tranche {
+      font-family: var(--font-titre);
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--blanc);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .hono-card-taux {
+      font-family: var(--font-titre);
+      font-size: 48px;
+      font-weight: 300;
+      color: var(--or-clair);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .hono-card-ttc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.12em;
+    }
+
+    .hono-note {
+      max-width: 1100px;
+      margin: 40px auto 0;
+      padding: 32px 40px;
+      background: #181818;
+      border-left: 2px solid var(--or);
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
+    }
+    .hono-note strong { color: rgba(255,255,255,0.8); }
+
+    /* ─── MENTIONS LÉGALES ─── */
+    #mentions { background: var(--gris-clair); }
+
+    .mentions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .mention-item { }
+    .mention-item-label {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 10px;
+    }
+    .mention-item-valeur {
+      font-size: 14px;
+      color: var(--noir);
+      line-height: 1.7;
+    }
+
+    /* ─── CONTACT ─── */
+    #contact {
+      background: var(--blanc);
+      text-align: center;
+    }
+
+    .contact-bloc {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .contact-nom {
+      font-family: var(--font-titre);
+      font-size: 32px;
+      font-weight: 300;
+      margin-bottom: 6px;
+    }
+    .contact-role {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 36px;
+    }
+
+    .contact-infos {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 44px;
+    }
+    .contact-ligne {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: 15px;
+      color: var(--gris);
+    }
+    .contact-ligne svg { color: var(--or); flex-shrink: 0; }
+    .contact-ligne a { color: var(--gris); text-decoration: none; transition: color 0.2s; }
+    .contact-ligne a:hover { color: var(--or); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--noir);
+      color: rgba(255,255,255,0.3);
+      padding: 36px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+    footer .footer-logo {
+      font-family: var(--font-titre);
+      font-size: 20px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.15em;
+    }
+    footer .footer-logo span { color: var(--or); }
+
+    /* ─── ANIMATIONS ─── */
+    .fade-in {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in:nth-child(2) { transition-delay: 0.1s; }
+    .fade-in:nth-child(3) { transition-delay: 0.2s; }
+    .fade-in:nth-child(4) { transition-delay: 0.3s; }
+
+    @media (max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 60px 24px; }
+      .hero-right { min-height: 50vh; }
+      section { padding: 70px 24px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">ABM<span>T</span></a>
+    <ul class="nav-links">
+      <li><a href="#honoraires">Honoraires</a></li>
+      <li><a href="#mentions">Informations légales</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="accueil" style="padding:0;">
+    <div class="hero-left">
+      <p class="hero-eyebrow">Agence immobilière – France & DOM-TOM</p>
+      <h1 class="hero-titre">L'immobilier<br>avec <em>méthode</em><br>et rigueur.</h1>
+      <p class="hero-sous-titre">
+        ABM Transaction accompagne acquéreurs et vendeurs dans leurs projets immobiliers en France et DOM-TOM, avec exigence, transparence et un engagement de résultat.<br><br>
+        ABM Transaction accompagne également ses clients à l'international grâce à des partenaires locaux sélectionnés.
+      </p>
+      <a href="#contact" class="hero-cta">
+        Prendre contact
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="hero-right">
+      <div class="hero-image-bg"></div>
+      <div class="hero-image-overlay"></div>
+      <div class="hero-stat-bloc">
+        <div class="stat-num">T</div>
+        <div class="stat-label">Transactions sur immeubles<br>et fonds de commerce</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HONORAIRES -->
+  <section id="honoraires">
+    <div class="separateur"></div>
+    <h2 class="section-titre">Barème des <em>honoraires</em></h2>
+    <p class="section-sous-titre">Honoraires TTC – Conformément à l'arrêté du 10 janvier 2017</p>
+
+    <div class="hono-grid">
+      <div class="hono-card fade-in">
+        <p class="hono-card-label">Tranche 1</p>
+        <p class="hono-card-tranche">Jusqu'à 150 000 €</p>
+        <p class="hono-card-taux">7 500 €</p>
+        <p class="hono-card-ttc">Forfait TTC</p>
+      </div>
+      <div class="hono-card fade-in">
+        <p class="hono-card-label">Tranche 2</p>
+        <p class="hono-card-tranche">De 150 000 € à 200 000 €</p>
+        <p class="hono-card-taux">6 %</p>
+        <p class="hono-card-ttc">TTC du prix de vente</p>
+      </div>
+      <div class="hono-card fade-in">
+        <p class="hono-card-label">Tranche 3</p>
+        <p class="hono-card-tranche">De 200 000 € à 250 000 €</p>
+        <p class="hono-card-taux">5,5 %</p>
+        <p class="hono-card-ttc">TTC du prix de vente</p>
+      </div>
+      <div class="hono-card fade-in">
+        <p class="hono-card-label">Tranche 4</p>
+        <p class="hono-card-tranche">Au-delà de 250 000 €</p>
+        <p class="hono-card-taux">5 %</p>
+        <p class="hono-card-ttc">TTC du prix de vente</p>
+      </div>
+    </div>
+
+    <div class="hono-note fade-in">
+      <strong>Honoraires à la charge du vendeur</strong>, sauf mention contraire précisée dans le mandat.<br>
+      Tarif en vigueur au 1er avril 2026 – TVA applicable : 20 %.<br>
+      MGI n'est pas habilitée à recevoir des fonds (sans détention de fonds).
+    </div>
+  </section>
+
+  <!-- MENTIONS LÉGALES -->
+  <section id="mentions">
+    <div class="separateur"></div>
+    <h2 class="section-titre">Informations <em>légales</em></h2>
+    <p class="section-sous-titre">Identification de la société et de son habilitation professionnelle</p>
+
+    <div class="mentions-grid">
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Raison sociale</p>
+        <p class="mention-item-valeur">MGI<br>SAS au capital de 500 €</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">RCS</p>
+        <p class="mention-item-valeur">Paris 995 288 206</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Siège social</p>
+        <p class="mention-item-valeur">60 rue François 1er<br>75008 Paris</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Carte professionnelle</p>
+        <p class="mention-item-valeur">« Transactions sur immeubles<br>et fonds de commerce »<br>n° CPI 7501 2026 000 000 136</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Délivrée par</p>
+        <p class="mention-item-valeur">CCI Paris Île-de-France</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Validité</p>
+        <p class="mention-item-valeur">Jusqu'au 08/03/2029<br>Sans détention de fonds</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Médiation</p>
+        <p class="mention-item-valeur">MEDIMMOCONSO<br>1 Allée du Parc de Mesemena, Bât A<br>CS 25222 – 44505 La Baule Cedex</p>
+      </div>
+      <div class="mention-item fade-in">
+        <p class="mention-item-label">Assurance RC Pro</p>
+        <p class="mention-item-valeur">AXA<br>Contrat n° 0000022546853504<br>Valable jusqu'au 01/01/2027</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="separateur"></div>
+    <h2 class="section-titre">Nous <em>contacter</em></h2>
+    <p class="section-sous-titre">Une question, un bien à estimer, un projet ?</p>
+
+    <div class="contact-bloc">
+      <p class="contact-nom">Sarah Do Nascimento</p>
+      <p class="contact-role">Présidente – Titulaire de la carte T</p>
+
+      <div class="contact-infos">
+        <div class="contact-ligne">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+          <a href="tel:+33617309415">06 17 30 94 15</a>
+        </div>
+        <div class="contact-ligne">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="/cdn-cgi/l/email-protection#4e3d602a21202f3d2d27232b203a210e3d2f3d63232927602d2123"><span class="__cf_email__" data-cfemail="6714490308090614040e0a02091308271406144a0a000e4904080a">[email&#160;protected]</span></a>
+        </div>
+        <div class="contact-ligne">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>60 rue François 1er – 75008 Paris</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">ABM<span>T</span></div>
+    <span>© 2026 ABM Transaction – RCS Paris 995 288 206</span>
+    <span>Carte T n° CPI 7501 2026 000 000 136</span>
+  </footer>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // Scroll nav
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Fade in on scroll
+    const observer = new Inter
